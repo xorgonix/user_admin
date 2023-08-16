@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Flask App • Pico.css</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+</head>
+
+<body>
+    <!-- Top-level navigation bar -->
+    <header class="container">
+        <nav>
+            <ul>
+                <li><a href="{{ url_for('index') }}">Home</a></li>
+                <li><a href="{{ url_for('register') }}">Register</a></li>
+                <li><a href="{{ url_for('login') }}">Login</a></li>
+                <li><a href="{{ url_for('logout') }}">Logout</a></li>
+                <li><a href="{{ url_for('update') }}">Update Profile</a></li>
+                <li><a href="{{ url_for('list_users') }}">List Users</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Content -->
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+
+
+    <!-- Scripts -->
+    <script src="{{ url_for('static', filename='js/minimal_theme_switcher.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/modal.js') }}"></script>
+</body>
+
+</html>
