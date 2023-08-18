@@ -7,7 +7,12 @@ import os
 # Set up Flask app and database
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.urandom(24)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///sophtbot.db'
+
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, "sophtbot.db")
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + db_path
+
 db = SQLAlchemy(app)
 
 # Define User model
@@ -106,8 +111,56 @@ def list_users():
     users = User.query.all()
     print(users)  # Add this print statement
     return render_template('list_users.html', users=users)
+@app.route('/user/<int:user_id>')
+@login_required
+def view_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return "<h1>User not found!</h1>", 404
+    return render_template('view_user.html', user=user)
 
 
+@app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
+@login_required
+def edit_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return "<h1>User not found!</h1>", 404
+    if request.method == 'POST':
+        user.user_name = request.form['username']
+        user.first_name = request.form['first_name']
+        user.last_name = request.form['last_name']
+        user.phone = request.form['phone']
+        user.email = request.form['email']
+        db.session.commit()
+        return redirect(url_for('list_users'))
+    return render_template('edit_user.html', user=user)
+
+
+@app.route('/user/<int:user_id>/delete', methods=['POST'])
+@login_required
+def delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return "<h1>User not found!</h1>", 404
+    db.session.delete(user)
+    db.session.commit()
+    return redirect(url_for('list_users'))
+
+
+@app.route('/user/<int:user_id>/confirm-delete', methods=['GET', 'POST'])
+@login_required
+def confirm_delete_user(user_id):
+    user = User.query.get(user_id)
+    if not user:
+        return "<h1>User not found!</h1>", 404
+
+    if request.method == 'POST':
+        db.session.delete(user)
+        db.session.commit()
+        return redirect(url_for('list_users'))
+
+    return render_template('confirm_delete_user.html', user=user)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000, host='0.0.0.0')

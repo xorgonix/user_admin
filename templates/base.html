@@ -8,12 +8,17 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/custom.css') }}" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
 </head>
 
 <body>
     <!-- Top-level navigation bar -->
-    <header class="container">
+    <div class="container">
         <nav>
+            <ul>
+                <li><strong>SophtBot</strong></li>
+            </ul>
             <ul>
                 <li><a href="{{ url_for('index') }}">Home</a></li>
                 <li><a href="{{ url_for('register') }}">Register</a></li>
@@ -23,7 +28,7 @@
                 <li><a href="{{ url_for('list_users') }}">List Users</a></li>
             </ul>
         </nav>
-    </header>
+    </div>
 
     <!-- Content -->
     <main class="container">

@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container">
+    <h2>Confirm User Deletion</h2>
+    <p>Are you sure you want to delete the user "{{ user.user_name }}"?</p>
+    <form action="{{ url_for('confirm_delete_user', user_id=user.id) }}" method="post">
+        <button type="submit" class="button contrast">Yes, Delete</button>
+        <a href="{{ url_for('list_users') }}" class="button secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}
