@@ -1,0 +1,184 @@
+Set up your development environment
+Fast-track local development with the essential tools needed for a Stripe integration.
+Quickstart by language
+Stripe’s server-side helper libraries (also known as server-side SDKs) and command-line interface (CLI) allow you to interact with Stripe’s REST APIs. Start with the Stripe CLI and make Stripe API calls without writing a line of code. Use the SDKs to avoid writing boilerplate code. To start sending requests from your environment, choose a language to follow a quickstart guide.
+
+
+Ruby
+
+Python
+
+Go
+
+Java
+
+Node.js
+
+PHP
+
+.NET
+In this quickstart, you install the Stripe CLI—an essential tool that gets you command line access to your Stripe integration. You also install the Stripe Python server-side SDK to get access to Stripe APIs from applications written in Python.
+
+In this quickstart, you’ll learn:
+
+How to call Stripe APIs without writing a line of code
+How to manage third-party dependencies using a virtual environment and the pip package manager
+How to install the latest Stripe Python SDK v6.0.0
+How to send your first SDK request
+Initial setup
+Setup the Stripe CLI
+Install
+From the command-line, use an install script or download and extract a versioned archive file for your operating system to install the CLI.
+
+
+homebrew
+
+apt
+
+yum
+
+Scoop
+
+macOS
+
+Linux
+
+Windows
+
+Docker
+To install the Stripe CLI on Windows without Scoop:
+
+Download the latest windows zip file from GitHub.
+Unzip the stripe_X.X.X_windows_x86_64.zip file.
+Run the unzipped .exe file.
+Authenticate
+Login and authenticate your Stripe user Account to generate a set of restricted keys. To learn more, see Stripe CLI keys and permissions.
+
+Command Line
+
+
+stripe login
+Press the Enter key on your keyboard to complete the authentication process in your browser.
+
+Output
+
+
+Your pairing code is: enjoy-enough-outwit-win
+This pairing code verifies your authentication with Stripe.
+Press Enter to open the browser or visit https://dashboard.stripe.com/stripecli/confirm_auth?t=THQdJfL3x12udFkNorJL8OF1iFlN8Az1 (^C to quit)
+Confirm setup
+Now that you’ve installed the CLI, you can make a single API request to Create a product.
+
+Command Line
+
+
+
+stripe products create \
+--name="My First Product" \
+--description="Created with the Stripe CLI"
+Look for the product identifier (in id) in the response object. Save it for the next step.
+
+If everything worked, the command-line displays the following response.
+
+
+
+{
+  "id": "prod_LTenIrmp8Q67sa",
+  "object": "product",
+See all 25 lines
+Next, call Create a price to attach a price of 30 USD. Swap the placeholder in product with your product identifier (for example, prod_LTenIrmp8Q67sa).
+
+Command Line
+
+
+
+stripe prices create \
+  --unit-amount=3000 \
+  --currency=usd \
+  --product={{PRODUCT_ID}}
+If everything worked, the command-line displays the following response.
+
+
+
+{
+  "id": "price_1KzlAMJJDeE9fu01WMJJr79o",
+  "object": "price",
+See all 20 lines
+Manage third-party dependencies
+We recommend managing third-party dependencies using the venv module, which allows you to add new libraries and include them in your Python 3 projects.
+
+On Windows (cmd.exe):
+Command Line
+
+
+python3 -m venv env
+.\env\Scripts\activate.bat
+On GNU/Linux or MacOS (bash):
+Command Line
+
+
+python3 -m venv env
+source env/bin/activate
+Install the Python server-side SDK
+The latest version of the Stripe Python server-side SDK is v6.0.0. It supports Python versions 3.6+.
+
+Check your Python version:
+
+Command Line
+
+
+python3 --version
+Install the library
+Install the library from PyPi, a package manager for Python:
+
+Command Line
+
+
+pip3 install --upgrade stripe
+Next, specify the following version in your requirements.txt file:
+
+requirements.txt
+
+
+stripe>=6.0.0
+Installation alternatives
+Run your first SDK request
+Now that you have the Python SDK installed, you can create a subscription Product and attach a Price with a couple API requests. We’re using the product identifier returned in the response to create the price in this example.
+
+Note
+This sample uses your Stripe user account’s default keys for test mode. Only you can see these values.
+
+create_price.py
+
+
+import stripe
+stripe.api_key = "sk_test_51Ni2C6AFil1bezBoN1khrPHM8AsoZwEGgelPtRCUC6wRf1mkEx7idQt7dPJC51UEZoRKOB29JNosoivzzUaBt4Vj004sRD7lJ0"
+
+starter_subscription = stripe.Product.create(
+  name="Starter Subscription",
+  description="$12/Month subscription",
+)
+
+starter_subscription_price = stripe.Price.create(
+  unit_amount=1200,
+  currency="usd",
+  recurring={"interval": "month"},
+  product=starter_subscription['id'],
+)
+
+# Save these identifiers
+print(f"Success! Here is your starter subscription product id: {starter_subscription.id}")
+print(f"Success! Here is your starter subscription price id: {starter_subscription_price.id}")
+Save the file as create_price.py. From the command line, cd to the directory containing the file you just saved and run:
+
+Command Line
+
+
+python3 create_price.py
+If everything worked, the command line shows the following response. Save these identifiers so you can use them while building your integration.
+
+Command Line
+
+
+Success! Here is your starter subscription product id: price_0KxBDl589O8KAxCG1alJgiA6
+Success! Here is your starter subscription price id: price_0KxBDm589O8KAxCGMgG7scjb
