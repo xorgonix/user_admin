@@ -85,4 +85,26 @@ def customer_portal():
 
 if __name__ == '__main__':
     app.run(port=5000, debug=True, host='0.0.0.0')
-    
+    @app.route('/plans', methods=['GET'])
+def display_plans():
+    # Fetch the plans from Stripe
+    plans = stripe.Plan.list()
+    # Render the plans in a template (you need to create this template)
+    return render_template('plans.html', plans=plans)
+
+@app.route('/select-plan', methods=['POST'])
+def select_plan():
+    # Get the selected plan ID from the frontend
+    plan_id = request.form.get('planId')
+    # Create a checkout session with the selected plan
+    session = stripe.checkout.Session.create(
+        success_url='https://example.com/success.html?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url='https://example.com/canceled.html',
+        mode='subscription',
+        line_items=[{
+            'price': plan_id,
+            'quantity': 1
+        }],
+    )
+    # Redirect to the checkout page
+    return redirect(session.url, code=303)
