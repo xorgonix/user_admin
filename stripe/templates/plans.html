@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Subscription Plans</title>
+</head>
+<body>
+    <h1>Choose a Subscription Plan</h1>
+    {% for plan in plans %}
+    <form action="/select-plan" method="POST">
+        <h2>{{ plan.name }}</h2>
+        <p>{{ plan.description }}</p>
+        <input type="hidden" name="planId" value="{{ plan.id }}">
+        <button type="submit">Select Plan</button>
+    </form>
+    {% endfor %}
+</body>
+</html>
