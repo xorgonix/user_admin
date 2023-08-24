@@ -1,6 +1,8 @@
-# Import additional modules
-from flask import jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for
+import stripe
 import json
+
+app = Flask(__name__)
 
 # Set your secret key. Remember to switch to your live secret key in production.
 # See your keys here: https://dashboard.stripe.com/apikeys
@@ -70,6 +72,7 @@ def customer_portal():
     # This is the URL to which the customer will be redirected after they are
     # done managing their billing with the portal.
     return_url = 'DOMAIN_URL'
+    return_url = url_for('index', _external=True)   
     customer_id = 'CUSTOMER_ID'
 
     session = stripe.billing_portal.Session.create(
@@ -79,3 +82,7 @@ def customer_portal():
 
     # redirect to the URL for the session
     return redirect(session.url, code=303)
+
+if __name__ == '__main__':
+    app.run(port=5000, debug=True, host='0.0.0.0')
+    
