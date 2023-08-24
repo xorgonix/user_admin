@@ -1,0 +1,359 @@
+Build a subscriptions integration
+Create and manage subscriptions to accept recurring payments.
+
+Low code
+
+Custom code
+
+Complexity:
+Customize logo, images, and colors.
+
+Use prebuilt hosted forms to collect payments and manage subscriptions.
+
+Clone a sample integration from GitHub.
+
+For an immersive version of this guide, see the Billing integration quickstart.
+
+View the demo to see a hosted example.
+
+What you’ll build
+This guide describes how to sell fixed-price monthly subscriptions using Stripe Checkout.
+
+This guide shows you how to:
+
+Model your business by building a product catalog
+Add a Checkout session to your site, including a button and success and cancellation pages
+Monitor subscription events and provision access to your service
+Set up the customer portal
+Add a customer portal session to your site, including a button and redirect
+Let customers manage their subscription through the portal
+If you aren’t ready to code an integration, you can set up basic subscriptions manually in the Dashboard or use Payment Links to set up subscriptions without writing any code.
+
+Learn more about designing an integration to understand the decisions and required resources in a full integration.
+
+After you complete the integration, you can extend it to:
+
+Display taxes
+Apply discounts
+Offer customers a free trial period
+Add more payment methods
+Integrate the hosted invoice page
+Use Checkout in setup mode
+Set up metered billing, pricing tiers, and usage-based pricing
+Manage prorations
+Allow customers to subscribe to multiple products
+Set up Stripe
+Install the Stripe client of your choice:
+
+
+Ruby
+
+Python
+
+PHP
+
+Java
+
+Node
+
+Go
+
+.NET
+Command Line
+
+
+# Install through pip
+pip3 install --upgrade stripe
+PyPi
+
+
+# Or find the Stripe package on http://pypi.python.org/pypi/stripe/
+requirements.txt
+
+
+# Find the version you want to pin:
+# https://github.com/stripe/stripe-python/blob/master/CHANGELOG.md
+# Specify that version in your requirements.txt file
+stripe>=5.0.0
+Install the Stripe CLI (optional). The CLI provides webhook testing, and you can run it to create your products and prices.
+
+
+homebrew
+
+Install from source
+Command Line
+
+
+# Install Homebrew to run this command: https://brew.sh/
+brew install stripe/stripe-cli/stripe
+
+# Connect the CLI to your dashboard
+stripe login
+For additional install options, see Get started with the Stripe CLI.
+
+Create the pricing model
+Dashboard or Stripe CLI
+Create your products and their prices in the Dashboard or with the Stripe CLI.
+
+This example uses a fixed-price service with two different service-level options: Basic and Premium. For each service-level option, you need to create a product and a recurring price.
+
+If you want to add a one-time charge for something like a setup fee, create a third product with a one-time price. To keep things simple, this example doesn’t include a one-time charge.
+
+In this example, each product bills at monthly intervals. The price for the Basic product is 5 USD; the price for the Premium product is 15 USD.
+
+
+Dashboard
+
+Stripe CLI
+Navigate to the Add a product page and create two products. Add one price for each product, each with a monthly recurring billing period:
+
+Premium product: Premium service with extra features
+
+Price: Standard model | 15 USD
+Basic product: Basic service with minimum features
+
+Price: Standard model | 5 USD
+Note
+You don’t need to specify the unit amount in the Dashboard unless you use the package pricing model.
+
+After you create the prices, record the price IDs so you can use them in subsequent steps. Price IDs look like this: price_G0FvDp6vZvdwRZ.
+
+Note
+The sample application uses lookup_keys to fetch prices rather than Price IDs.
+
+When you’re ready, use the Copy to live mode button at the top right of the page to clone your product from test mode to live mode.
+
+If you offer multiple billing intervals, use Checkout to upsell customers on longer billing intervals and collect more revenue upfront.
+
+For other pricing models, see Billing examples.
+
+Create a Checkout Session
+Client and Server
+Add a checkout button to your website that calls a server-side endpoint to create a Checkout Session.
+
+index.html
+View full sample
+
+
+<html>
+  <head>
+    <title>Checkout</title>
+  </head>
+  <body>
+    <form action="/create-checkout-session" method="POST">
+      <!-- Note: If using PHP set the action to /create-checkout-session.php -->
+
+      <input type="hidden" name="priceId" value="price_G0FvDp6vZvdwRZ" />
+      <button type="submit">Checkout</button>
+    </form>
+  </body>
+</html>
+On the backend of your application, define an endpoint that creates the session for your frontend to call. You need these values:
+
+The price ID of the subscription the customer is signing up for—your frontend passes this value
+Your success_url, a page on your website that Checkout returns your customer to after they complete the payment
+You can optionally provide cancel_url, a page on your website that Checkout returns your customer to if they cancel the payment process. You can also configure a billing cycle anchor to your subscription in this call.
+
+If you created a one-time price in step 2, pass that price ID as well. After creating a Checkout Session, redirect your customer to the URL returned in the response.
+
+
+Ruby
+
+Python
+
+PHP
+
+Java
+
+Node
+
+Go
+
+.NET
+server.py
+View full sample
+
+
+# The price ID passed from the front end.
+#   price_id = request.form.get('priceId')
+price_id = '{{PRICE_ID}}'
+
+session = stripe.checkout.Session.create(
+  success_url='https://example.com/success.html?session_id={CHECKOUT_SESSION_ID}',
+  cancel_url='https://example.com/canceled.html',
+  mode='subscription',
+  line_items=[{
+    'price': price_id,
+    # For metered billing, do not pass quantity
+    'quantity': 1
+  }],
+)
+
+# Redirect to the URL returned on the session
+#   return redirect(session.url, code=303)
+This example customizes the success_url by appending the Session ID. For more information about this approach, see the documentation on how to Customize your success page.
+
+From your Dashboard, enable the payment methods you want to accept from your customers. Checkout supports several payment methods.
+
+Provision and monitor subscriptions
+Server
+After the subscription signup succeeds, the customer returns to your website at the success_url, which initiates a checkout.session.completed webhooks. When you receive a checkout.session.completed event, you can provision the subscription. Continue to provision each month (if billing monthly) as you receive invoice.paid events. If you receive an invoice.payment_failed event, notify your customer and send them to the customer portal to update their payment method.
+
+To determine the next step for your system’s logic, check the event type and parse the payload of each event object, such as invoice.paid. Store the subscription.id and customer.id event objects in your database for verification.
+
+For testing purposes, you can monitor events in the Dashboard. For production, set up a webhook endpoint and subscribe to appropriate event types. If you don’t know your STRIPE_WEBHOOK_SECRET key, click the webhook in the Dashboard to view it.
+
+
+Ruby
+
+Python
+
+PHP
+
+Java
+
+Node
+
+Go
+
+.NET
+server.py
+View full sample
+
+
+# Set your secret key. Remember to switch to your live secret key in production.
+# See your keys here: https://dashboard.stripe.com/apikeys
+stripe.api_key = 'sk_test_51Ni2C6AFil1bezBoN1khrPHM8AsoZwEGgelPtRCUC6wRf1mkEx7idQt7dPJC51UEZoRKOB29JNosoivzzUaBt4Vj004sRD7lJ0'
+
+@app.route('/webhook', methods=['POST'])
+def webhook_received():
+    webhook_secret = {{'STRIPE_WEBHOOK_SECRET'}}
+    request_data = json.loads(request.data)
+
+    if webhook_secret:
+        # Retrieve the event by verifying the signature using the raw body and secret if webhook signing is configured.
+        signature = request.headers.get('stripe-signature')
+        try:
+            event = stripe.Webhook.construct_event(
+                payload=request.data, sig_header=signature, secret=webhook_secret)
+            data = event['data']
+        except Exception as e:
+            return e
+        # Get the type of webhook event sent - used to check the status of PaymentIntents.
+        event_type = event['type']
+    else:
+        data = request_data['data']
+        event_type = request_data['type']
+    data_object = data['object']
+
+    if event_type == 'checkout.session.completed':
+    # Payment is successful and the subscription is created.
+    # You should provision the subscription and save the customer ID to your database.
+      print(data)
+    elif event_type == 'invoice.paid':
+    # Continue to provision the subscription as payments continue to be made.
+    # Store the status in your database and check when a user accesses your service.
+    # This approach helps you avoid hitting rate limits.
+      print(data)
+    elif event_type == 'invoice.payment_failed':
+    # The payment failed or the customer does not have a valid payment method.
+    # The subscription becomes past_due. Notify your customer and send them to the
+    # customer portal to update their payment information.
+      print(data)
+    else:
+      print('Unhandled event type {}'.format(event_type))
+
+    return jsonify({'status': 'success'})
+The minimum event types to monitor:
+
+EVENT NAME	DESCRIPTION
+checkout.session.completed	Sent when a customer clicks the Pay or Subscribe button in Checkout, informing you of a new purchase.
+invoice.paid	Sent each billing interval when a payment succeeds.
+invoice.payment_failed	Sent each billing interval if there is an issue with your customer’s payment method.
+For even more events to monitor, see Subscription webhooks.
+
+Configure the customer portal
+Dashboard
+The customer portal lets your customers directly manage their existing subscriptions and invoices.
+
+Use the Dashboard to configure the portal. At a minimum, make sure to configure it so that customers can update their payment methods. See Integrating the customer portal for information about other settings you can configure.
+
+Create a portal Session
+Server
+Define an endpoint that creates the customer portal session for your frontend to call. Here CUSTOMER_ID refers to the customer ID created by a Checkout Session that you saved while processing the checkout.session.completed webhook. You can also set a default redirect link for the portal in the Dashboard.
+
+Pass an optional return_url value for the page on your site to redirect your customer to after they finish managing their subscription:
+
+
+Ruby
+
+Python
+
+PHP
+
+Java
+
+Node
+
+Go
+
+.NET
+server.py
+View full sample
+
+
+# Set your secret key. Remember to switch to your live secret key in production.
+# See your keys here: https://dashboard.stripe.com/apikeys
+stripe.api_key = 'sk_test_51Ni2C6AFil1bezBoN1khrPHM8AsoZwEGgelPtRCUC6wRf1mkEx7idQt7dPJC51UEZoRKOB29JNosoivzzUaBt4Vj004sRD7lJ0'
+
+# This is the URL to which the customer will be redirected after they are
+# done managing their billing with the portal.
+return_url = '{{DOMAIN_URL}}'
+customer_id = '{{CUSTOMER_ID}}'
+
+session = stripe.billing_portal.Session.create(
+    customer=customer_id,
+    return_url=return_url,
+)
+
+# redirect to the URL for the session
+#   return redirect(session.url, code=303)
+Send customers to the customer portal
+Client
+On your frontend, add a button to the page at the success_url that provides a link to the customer portal:
+
+success.html
+View full sample
+
+
+<html>
+  <head>
+    <title>Manage Billing</title>
+  </head>
+  <body>
+    <form action="/customer-portal" method="POST">
+      <!-- Note: If using PHP set the action to /customer-portal.php -->
+      <button type="submit">Manage Billing</button>
+    </form>
+  </body>
+</html>
+After exiting the customer portal, the Customer returns to your website at the return_url. Continue to monitor webhooks to track the state of the Customer’s subscription.
+
+If you configure the customer portal to allow actions such as canceling a subscription, see Integrating the customer portal for additional events to monitor.
+
+Test your integration
+Test payment methods
+Use the following table to test different payment methods and scenarios.
+
+PAYMENT METHOD	SCENARIO	HOW TO TEST
+BECS Direct Debit	Your customer successfully pays with BECS Direct Debit.	Fill out the form using the account number 900123456 and BSB 000-000. The confirmed PaymentIntent initially transitions to processing, then transitions to the succeeded status three minutes later.
+BECS Direct Debit	Your customer’s payment fails with an account_closed error code.	Fill out the form using the account number 111111113 and BSB 000-000.
+Credit card	The card payment succeeds and does not require authentication.	Fill out the credit card form using the credit card number 4242 4242 4242 4242 with any expiration, CVC, and postal code.
+Credit card	The card payment requires authentication.	Fill out the credit card form using the credit card number 4000 0025 0000 3155 with any expiration, CVC, and postal code.
+Credit card	The card is declined with a decline code like insufficient_funds.	Fill out the credit card form using the credit card number 4000 0000 0000 9995 with any expiration, CVC, and postal code.
+SEPA Direct Debit	Your customer successfully pays with SEPA Direct Debit.	Fill out the form using the account number AT321904300235473204. The confirmed PaymentIntent initially transitions to processing, then transitions to the succeeded status three minutes later.
+SEPA Direct Debit	Your customer’s payment intent status transition from processing to requires_payment_method.	Fill out the form using the account number AT861904300235473202.
+Monitoring events
+Set up webhooks to listen to subscription change events like upgrades and cancellations. Read the guide to learn more about subscription webhooks. You can view events in the Dashboard or with the Stripe CLI.
+
+For more details about testing your Billing integration, read the guide

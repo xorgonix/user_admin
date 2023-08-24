@@ -3,10 +3,14 @@ import stripe
 
 app = Flask(__name__)
 
+#set the template folder to the templates folder in the current directory
+
+app.template_folder = './stripe/templates'
+
 # Stripe API keys
 stripe_keys = {
-  'secret_key': 'your_secret_key',
-  'publishable_key': 'your_publishable_key'
+  'secret_key': 'sk_test_51Ni2C6AFil1bezBoN1khrPHM8AsoZwEGgelPtRCUC6wRf1mkEx7idQt7dPJC51UEZoRKOB29JNosoivzzUaBt4Vj004sRD7lJ0',
+  'publishable_key': 'pk_test_51Ni2C6AFil1bezBoqXwLAd2UsrcFhZ3yqZY0ZKcxeZNGcOTLJrXxaoymJHf7ozTHldJemG8Gch6RPsDZRwuqa8jM00vWHXfD5L'
 }
 
 stripe.api_key = stripe_keys['secret_key']

@@ -1,10 +1,20 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Subscription Plans</title>
-</head>
-<body>
+{% extends "base.html" %}
+{% block content %}
+<div class="container">
     <h1>Choose a Subscription Plan</h1>
-    <!-- TODO: Display subscription plans -->
-</body>
-</html>
+    <form action="/checkout" method="post">
+        <div>
+            <h2>Basic Plan</h2>
+            <button type="submit" name="plan" value="basic">Subscribe</button>
+        </div>
+        <div>
+            <h2>Premium Plan</h2>
+            <button type="submit" name="plan" value="premium">Subscribe</button>
+        </div>
+        <div>
+            <h2>Ultimate Plan</h2>
+            <button type="submit" name="plan" value="ultimate">Subscribe</button>
+        </div>
+    </form>
+</div>
+{% endblock %}
