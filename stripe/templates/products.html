@@ -5,6 +5,11 @@
 </head>
 <body>
     <h1>Your Products</h1>
-    <!-- TODO: Display user's products and purchase history -->
+    {% for product in products %}
+        <div>
+            <h2>{{ product.name }}</h2>
+            <p>{{ product.description }}</p>
+        </div>
+    {% endfor %}
 </body>
 </html>

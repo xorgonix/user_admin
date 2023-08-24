@@ -5,6 +5,9 @@
 </head>
 <body>
     <h1>Checkout</h1>
-    <!-- TODO: Implement checkout form -->
+    <form action="/checkout" method="post">
+        <input type="hidden" name="plan" value="{{ plan }}">
+        <button type="submit">Subscribe</button>
+    </form>
 </body>
 </html>

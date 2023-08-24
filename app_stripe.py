@@ -17,13 +17,23 @@ def index():
 
 @app.route('/checkout', methods=['POST'])
 def checkout():
-    # TODO: Implement checkout process
-    pass
+    plan = request.form.get('plan')
+    session = stripe.checkout.Session.create(
+        payment_method_types=['card'],
+        line_items=[{
+            'price': stripe_keys[plan],
+            'quantity': 1,
+        }],
+        mode='subscription',
+        success_url=url_for('success', _external=True) + '?session_id={CHECKOUT_SESSION_ID}',
+        cancel_url=url_for('index', _external=True),
+    )
+    return jsonify({'session_id': session.id})
 
 @app.route('/products')
 def products():
-    # TODO: Display user's products
-    pass
+    products = stripe.Product.list()
+    return render_template('products.html', products=products)
 
 if __name__ == '__main__':
     app.run(debug=True)
